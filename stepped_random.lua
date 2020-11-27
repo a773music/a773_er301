@@ -1,7 +1,6 @@
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
-local Encoder = require "Encoder"
 local ply = app.SECTION_PLY
 
 local stepped_random = Class{}

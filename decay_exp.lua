@@ -1,11 +1,8 @@
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
-local Fader = require "Unit.ViewControl.Fader"
 local GainBias = require "Unit.ViewControl.GainBias"
-local InputGate = require "Unit.ViewControl.InputGate"
 local OutputScope = require "Unit.ViewControl.OutputScope"
-local Encoder = require "Encoder"
 local ply = app.SECTION_PLY
 
 local Decay = Class{}
@@ -39,7 +36,6 @@ function Decay:onLoadGraph(channelCount)
    connect(decay,"Out",adsr,"Decay")
    connect(decay,"Out",decayRange,"In")
 
-
    connect(exp,"Out",self,"Out1")
    if channelCount==2 then
       connect(exp,"Out",self,"Out2")
@@ -50,9 +46,8 @@ end
 
 local views = {
    expanded = {"input","decay"},
+   expanded = {"decay"},
    collapsed = {},
-   input = {"scope","input"},
-   decay = {"scope","decay"},
 }
 
 function Decay:onLoadViews(objects,branches)
@@ -65,19 +60,8 @@ function Decay:onLoadViews(objects,branches)
       return map
    end
    
-   local time_map = createMap(.001, 2, 0.1, 0.01, 0.001, 0.001, 0.001)
+   local time_map = createMap(0, 2, 0.1, 0.01, 0.001, 0.001, 0.001)
    
-   controls.scope = OutputScope {
-      monitor = self,
-      width = 4*ply,
-   }
-   
-   controls.input = InputGate {
-      button = "input",
-      description = "Unit Input",
-      comparator = objects.gate,
-   }
-
    controls.decay = GainBias {
       button = "D",
       branch = branches.decay,

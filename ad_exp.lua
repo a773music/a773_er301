@@ -1,11 +1,11 @@
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
-local Fader = require "Unit.ViewControl.Fader"
+--local Fader = require "Unit.ViewControl.Fader"
 local GainBias = require "Unit.ViewControl.GainBias"
-local InputGate = require "Unit.ViewControl.InputGate"
+--local InputGate = require "Unit.ViewControl.InputGate"
 local OutputScope = require "Unit.ViewControl.OutputScope"
-local Encoder = require "Encoder"
+--local Encoder = require "Encoder"
 local ply = app.SECTION_PLY
 
 local AD = Class{}
@@ -63,11 +63,12 @@ function AD:onLoadGraph(channelCount)
 end
 
 local views = {
-   expanded = {"input","attack","decay"},
+   --expanded = {"input","attack","decay"},
+   expanded = {"attack","decay"},
    collapsed = {},
-   input = {"scope","input"},
-   attack = {"scope","attack"},
-   decay = {"scope","decay"},
+--   input = {"scope","input"},
+--   attack = {"scope","attack"},
+--   decay = {"scope","decay"},
 }
 
 function AD:onLoadViews(objects,branches)
@@ -81,7 +82,8 @@ function AD:onLoadViews(objects,branches)
    end
    
    local time_map = createMap(.002, 2, 0.1, 0.01, 0.001, 0.001, 0.001)
-   
+
+   --[[
    controls.scope = OutputScope {
       monitor = self,
       width = 4*ply,
@@ -92,7 +94,7 @@ function AD:onLoadViews(objects,branches)
       description = "Unit Input",
       comparator = objects.gate,
    }
-   
+   --]]
    controls.attack = GainBias {
       button = "A",
       branch = branches.attack,
