@@ -1,0 +1,11 @@
+measured on around 60-70% cpu load, by loading a large number of units
+cpu usage = (total_cpu% - 3%) / nb_units
+CU is the cpu usage from a comparable custom unit build by me
+
+ad: 1.38% (CU: 3.15%)
+ad_exp:	1.46% (CU: 4.57%)
+ad_exp2: 1.48%
+decay: 0.71%
+decay_exp: 0.78%
+decay_exp2: 0.83%
+stepped_random: 0.69 (CU: 1.12%, AccentsPingedScaledRandom: 1.78)
