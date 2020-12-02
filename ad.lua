@@ -2,7 +2,6 @@ local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
 local GainBias = require "Unit.ViewControl.GainBias"
-local OutputScope = require "Unit.ViewControl.OutputScope"
 local ply = app.SECTION_PLY
 
 local AD = Class{}
@@ -15,42 +14,47 @@ function AD:init(args)
 end
 
 function AD:onLoadGraph(channelCount)
-   local gate = self:createObject("Comparator","gate")
-   gate:setGateMode()
-   
-   local adsr0 = self:createObject("ADSR","adsr0")
+   local trig = self:createObject("Comparator","trig")
+   trig:setTriggerMode()
+   local pre_env = self:createObject("SkewedSineEnvelope","env")
    local adsr = self:createObject("ADSR","adsr")
    local attack = self:createObject("GainBias","attack")
    local decay = self:createObject("GainBias","decay")
    local attackRange = self:createObject("MinMax","attackRange")
    local decayRange = self:createObject("MinMax","decayRange")
-   local out = self:createObject("Multiply","out")
-   local out_gain = self:createObject("Constant","out_gain")
+   local pre_env_level = self:createObject("Constant","pre_env_level")
+   local pre_env_dur_bias = self:createObject("Constant","pre_env_dur_bias")
+   local pre_env_dur_sum = self:createObject("Sum","pre_env_dur_sum")
+   local duration = self:createObject("ParameterAdapter","duration")
    
-   connect(self,"In1",gate,"In")
-   connect(adsr0,"Out",adsr,"Gate")
-   connect(gate,"Out",adsr0,"Gate")
+   -- setup trigger route: in -> pre_env -> adsr
+   connect(self,"In1",trig,"In")
+   connect(trig,"Out",pre_env,"Trigger")
+   connect(pre_env,"Out",adsr,"Gate") --needed to trigger pre_env
    
-   adsr:hardSet("Sustain",1)
+   -- setup pre_env
+   pre_env_dur_bias:hardSet("Value",.02)
+   connect(attack, "Out", pre_env_dur_sum, "Left")
+   connect(pre_env_dur_bias, "Out", pre_env_dur_sum, "Right")
+   pre_env:hardSet("Skew", -1)
+   pre_env_level:hardSet("Value", 1)
+   connect(pre_env_level, "Out", pre_env, "Level")
+   -- connect to adapter
+   tie(pre_env,"Duration",duration,"Out")
+   connect(pre_env_dur_sum, "Out", duration, "In")
+   duration:hardSet("Gain",1)
 
+   -- setup adsr
    connect(attack,"Out",adsr,"Attack")
+   connect(decay,"Out",adsr,"Decay")
    connect(decay,"Out",adsr,"Release")
+   adsr:hardSet("Sustain",0)
    connect(attack,"Out",attackRange,"In")
    connect(decay,"Out",decayRange,"In")
 
-   adsr0:hardSet("Attack",0)
-   adsr0:hardSet("Sustain",1)
-   connect(attack,"Out",adsr0,"Decay")
-   connect(attack,"Out",adsr0,"Release")
-
-   connect(adsr,"Out",out,"Left")
-   
-   out_gain:hardSet("Value",1.8)
-   connect(out_gain,"Out",out,"Right")
-
-   connect(out,"Out",self,"Out1")
+   connect(adsr,"Out",self,"Out1")
    if channelCount==2 then
-      connect(out,"Out",self,"Out2")
+      connect(adsr,"Out",self,"Out2")
    end
 
    self:createMonoBranch("attack",attack,"In",attack,"Out")
@@ -82,7 +86,7 @@ function AD:onLoadViews(objects,branches)
       range = objects.attackRange,
       biasMap = time_map,
       biasUnits = app.unitSecs,
-      initialBias = 0.002
+      --initialBias = 0
    }
    
    controls.decay = GainBias {
@@ -95,7 +99,7 @@ function AD:onLoadViews(objects,branches)
       biasUnits = app.unitSecs,
       initialBias = 0.050
    }
-   
+
    return controls, views
 end
 

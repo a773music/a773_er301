@@ -1,11 +1,10 @@
 # a773 bespoke ER-301 units
-
-ad: 1.40% (CU: 3.15%)  
-ad_exp: 1.47% (CU: 4.57%)  
-ad_exp2: 1.54%  
-decay: 0.70%  
-decay_exp: 0.76%  
-decay_exp2: 0.83%  
+ad: 1.52% (CU: 3.15%)
+ad_exp:	1.83% (CU: 4.57%)
+ad_exp2: 1.53%
+decay: 0.70%
+decay_exp: 0.76%
+decay_exp2: 0.83%
 stepped_random: 0.69% (CU: 1.12%, AccentsPingedScaledRandom: 1.78%)
 
 ## Installation

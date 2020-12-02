@@ -2,63 +2,66 @@ local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
 local GainBias = require "Unit.ViewControl.GainBias"
-local OutputScope = require "Unit.ViewControl.OutputScope"
 local ply = app.SECTION_PLY
 
-local AD = Class{}
-AD:include(Unit)
+local AD_EXP2 = Class{}
+AD_EXP2:include(Unit)
 
-function AD:init(args)
+function AD_EXP2:init(args)
    args.title = "ad exp2"
-   args.mnemonic = "Ax"
+   args.mnemonic = "Ad"
    Unit.init(self,args)
 end
 
-function AD:onLoadGraph(channelCount)
-   local gate = self:createObject("Comparator","gate")
-   gate:setGateMode()
-   
-   local adsr0 = self:createObject("ADSR","adsr0")
+function AD_EXP2:onLoadGraph(channelCount)
+   local trig = self:createObject("Comparator","trig")
+   trig:setTriggerMode()
+   local pre_env = self:createObject("SkewedSineEnvelope","env")
    local adsr = self:createObject("ADSR","adsr")
    local attack = self:createObject("GainBias","attack")
    local decay = self:createObject("GainBias","decay")
    local attackRange = self:createObject("MinMax","attackRange")
    local decayRange = self:createObject("MinMax","decayRange")
+   local pre_env_level = self:createObject("Constant","pre_env_level")
+   local pre_env_dur_bias = self:createObject("Constant","pre_env_dur_bias")
+   local pre_env_dur_sum = self:createObject("Sum","pre_env_dur_sum")
+   local duration = self:createObject("ParameterAdapter","duration")
    local exp = self:createObject("Multiply","exp")
-   local exp2 = self:createObject("Multiply","exp2")
-   local out = self:createObject("Multiply","out")
-   local out_gain = self:createObject("Constant","out_gain")
    
-   connect(self,"In1",gate,"In")
-   connect(adsr0,"Out",adsr,"Gate")
-   connect(gate,"Out",adsr0,"Gate")
+   -- setup trigger route: in -> pre_env -> adsr
+   connect(self,"In1",trig,"In")
+   connect(trig,"Out",pre_env,"Trigger")
+   connect(pre_env,"Out",adsr,"Gate") --needed to trigger pre_env
    
-   adsr:hardSet("Sustain",1)
+   -- setup pre_env
+   pre_env_dur_bias:hardSet("Value",.02)
+   connect(attack, "Out", pre_env_dur_sum, "Left")
+   connect(pre_env_dur_bias, "Out", pre_env_dur_sum, "Right")
+   pre_env:hardSet("Skew", -1)
+   pre_env_level:hardSet("Value", 1)
+   connect(pre_env_level, "Out", pre_env, "Level")
+   -- connect to adapter
+   tie(pre_env,"Duration",duration,"Out")
+   connect(pre_env_dur_sum, "Out", duration, "In")
+   duration:hardSet("Gain",1)
 
+   -- setup adsr
    connect(attack,"Out",adsr,"Attack")
+   connect(decay,"Out",adsr,"Decay")
    connect(decay,"Out",adsr,"Release")
+   adsr:hardSet("Sustain",0)
    connect(attack,"Out",attackRange,"In")
    connect(decay,"Out",decayRange,"In")
 
-   adsr0:hardSet("Attack",0)
-   adsr0:hardSet("Sustain",1)
-   connect(attack,"Out",adsr0,"Decay")
-   connect(attack,"Out",adsr0,"Release")
 
    connect(adsr,"Out",exp,"Left")
    connect(adsr,"Out",exp,"Right")
-   connect(exp,"Out",exp2,"Left")
-   connect(exp,"Out",exp2,"Right")
-   connect(exp2,"Out",out,"Left")
+   connect(exp,"Out",self,"Out1")
    
-   out_gain:hardSet("Value",11.5)
-   connect(out_gain,"Out",out,"Right")
-
-   connect(out,"Out",self,"Out1")
    if channelCount==2 then
-      connect(out,"Out",self,"Out2")
+      connect(exp,"Out",self,"Out2")
    end
-   
+
    self:createMonoBranch("attack",attack,"In",attack,"Out")
    self:createMonoBranch("decay",decay,"In",decay,"Out")
 end
@@ -68,7 +71,7 @@ local views = {
    collapsed = {},
 }
 
-function AD:onLoadViews(objects,branches)
+function AD_EXP2:onLoadViews(objects,branches)
    local controls = {}
 
    local createMap = function (min, max, superCourse, course, fine, superFine, rounding)
@@ -88,7 +91,7 @@ function AD:onLoadViews(objects,branches)
       range = objects.attackRange,
       biasMap = time_map,
       biasUnits = app.unitSecs,
-      initialBias = 0.002
+      --initialBias = 0
    }
    
    controls.decay = GainBias {
@@ -101,8 +104,8 @@ function AD:onLoadViews(objects,branches)
       biasUnits = app.unitSecs,
       initialBias = 0.050
    }
-   
+
    return controls, views
 end
 
-return AD
+return AD_EXP2
