@@ -1,13 +1,12 @@
 local units = {
-  {category="Envelopes"},
-  {title="ad",moduleName="ad",keywords="envelope"},
-  {title="ad exp",moduleName="ad_exp",keywords="envelope"},
-  {title="ad exp2",moduleName="ad_exp2",keywords="envelope"},
-  {title="decay",moduleName="decay",keywords="envelope"},
-  {title="decay exp",moduleName="decay_exp",keywords="envelope"},
-  {title="decay exp2",moduleName="decay_exp2",keywords="envelope"},
   {category="a773"},
-  {title="stepped random",moduleName="stepped_random",keywords="random"},
+  {title="AD",moduleName="ad",keywords="envelope"},
+  {title="AD Exp",moduleName="ad_exp",keywords="envelope"},
+  {title="AD Exp2",moduleName="ad_exp2",keywords="envelope"},
+  {title="Decay",moduleName="decay",keywords="envelope"},
+  {title="Decay Exp",moduleName="decay_exp",keywords="envelope"},
+  {title="Decay Exp2",moduleName="decay_exp2",keywords="envelope"},
+  {title="Stepped Random",moduleName="stepped_random",keywords="random"},
 }
 
 return {
