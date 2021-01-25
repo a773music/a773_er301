@@ -3,6 +3,7 @@ local units = {
   {title="AD",moduleName="ad",keywords="envelope"},
   {title="AD Exp",moduleName="ad_exp",keywords="envelope"},
   {title="AD Exp2",moduleName="ad_exp2",keywords="envelope"},
+  {title="BD1",moduleName="bd1",keywords="drums"},
   {title="Decay",moduleName="decay",keywords="envelope"},
   {title="Decay Exp",moduleName="decay_exp",keywords="envelope"},
   {title="Decay Exp2",moduleName="decay_exp2",keywords="envelope"},
