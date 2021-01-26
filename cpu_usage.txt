@@ -5,6 +5,7 @@ CU is the cpu usage from a comparable custom unit build by me
 ad: 1.40% (CU: 3.15%)
 ad_exp:	1.47% (CU: 4.57%)
 ad_exp2: 1.54%
+bd1: 4.1% (CU: 7.33%)
 decay: 0.70%
 decay_exp: 0.76%
 decay_exp2: 0.83%

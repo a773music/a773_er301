@@ -70,7 +70,10 @@ function BD1:onLoadGraph(channelCount)
    local feedback = self:createObject("GainBias","feedback")
    local feedbackRange = self:createObject("MinMax","feedbackRange")
    
+   local click = self:createObject("GainBias","click")
+   local click_range = self:createObject("MinMax","click_range")
    
+
    
    --outGain:hardSet("Gain",1.0)
 
@@ -82,6 +85,8 @@ function BD1:onLoadGraph(channelCount)
    -- no click, sync on trigger
    connect(trig,"Out",sync,"In")
    connect(sync,"Out",osc,"Sync")
+   -- phase is click
+   connect(click,"Out",osc,"Phase")
 
    -- make snappy
    connect(p_env,"Out",p_exp,"Left")
@@ -148,7 +153,8 @@ function BD1:onLoadGraph(channelCount)
    self:createMonoBranch("p_decay",p_decay,"In",p_decay,"Out")
    self:createMonoBranch("a_decay",a_decay,"In",a_decay,"Out")
    self:createMonoBranch("pitch_env_depth",pitch_env_depth,"In",pitch_env_depth,"Out")
-   self:createMonoBranch("gain", gain, "In", gain,"Out")
+   self:createMonoBranch("gain",gain,"In",gain,"Out")
+   self:createMonoBranch("click", click,"In",click,"Out")
    --self:createMonoBranch("outGain", outGain, "In", outGain,"Out")
    self:createMonoBranch("feedback",feedback,"In",feedback,"Out")
    
@@ -156,7 +162,7 @@ end
 
 local views = {
    --expanded = {"trig","tune","a_decay", "p_decay","pitch_env_depth","feedback","gain","outGain"},
-   expanded = {"trig","tune","a_decay", "p_decay","pitch_env_depth","feedback","gain"},
+   expanded = {"trig","click","tune","a_decay", "p_decay","pitch_env_depth","feedback","gain"},
    collapsed = {},
 }
 
@@ -173,6 +179,7 @@ function BD1:onLoadViews(objects,branches)
    local time_map = createMap(.001, 2, 0.1, 0.01, 0.001, 0.001, 0.001)
    local pitch_map = createMap(0, 1000, 100, 10, 1, 1, 1)
    local gain_map = createMap(0, 1, .1, .01, .01, .01, .01)
+   local click_map = createMap(0, .25, .1, .01, .01, .01, .01)
    
    controls.scope = OutputScope {
       monitor = self,
@@ -186,7 +193,20 @@ function BD1:onLoadViews(objects,branches)
       comparator = objects.trig,
    }
 
+   controls.click = GainBias {
+      button = "click",
+      branch = branches.click,
+      description = "click",
+      gainbias = objects.click,
+      biasMap = click_map,
+      --biasMap = Encoder.getMap("[0,1]"),
+      range = objects.click_range,
+      initialBias = 0,
+   }
+   
 
+
+   
    controls.tune = Pitch {
       button = "V/oct",
       branch = branches.tune,
