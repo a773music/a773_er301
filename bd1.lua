@@ -14,7 +14,7 @@ local BD1 = Class{}
 BD1:include(Unit)
 
 function BD1:init(args)
-   args.title = "bd1"
+   args.title = "bd0"
    args.mnemonic = "Dx"
    Unit.init(self,args)
 end
@@ -25,15 +25,14 @@ function BD1:onLoadGraph(channelCount)
    --trig:setTriggerMode()
    local sync = self:createObject("Comparator","sync")
    sync:setTriggerMode()
-
+   
    local osc = self:createObject("SineOscillator","osc")
    local base_freq = self:createObject("Constant","base_freq")
    
    local p_env = self:createObject("ADSR","p_env")
    local pitch_env_depth = self:createObject("GainBias","pitch_env_depth")
    local pitch_env_depth_range = self:createObject("MinMax","pitch_env_depth_range")
-
-
+   
    local p_decay = self:createObject("GainBias","p_decay")
    local p_decay_range = self:createObject("MinMax","p_decay_range")
    local p_exp = self:createObject("Multiply","p_exp")
@@ -41,28 +40,21 @@ function BD1:onLoadGraph(channelCount)
    local a_exp = self:createObject("Multiply","a_exp")
    local a_exp2 = self:createObject("Multiply","a_exp2")
    local osc_env = self:createObject("Multiply","osc_env")
-   local osc_amp = self:createObject("Multiply","osc_amp")
+   local osc_gain = self:createObject("ConstantGain","osc_gain")
+   
    local output = self:createObject("Sum","output")
    local fundamental = self:createObject("Sum","fundamental")
    local p_env_amplified = self:createObject("Multiply","p_env_amplified")
-
    
    local a_env = self:createObject("ADSR","a_env")
    local a_decay = self:createObject("GainBias","a_decay")
    local a_decay_range = self:createObject("MinMax","a_decay_range")
-
-
-   
    
    local tune = self:createObject("ConstantOffset","tune")
    local tuneRange = self:createObject("MinMax","tuneRange")
    
-   --local gain = self:createObject("ConstantGain","gain")
-   --gain:setClampInDecibels(-59.9)
-   --gain:hardSet("Gain",1.0)
-   
-   --local outGain = self:createObject("ConstantGain","outGain")
-   
+   osc_gain:setClampInDecibels(-59.9)
+   osc_gain:hardSet("Gain",1.0)
    
    local gain = self:createObject("GainBias","gain")
    local gain_range = self:createObject("MinMax","gain_range")
@@ -73,12 +65,6 @@ function BD1:onLoadGraph(channelCount)
    local click = self:createObject("GainBias","click")
    local click_range = self:createObject("MinMax","click_range")
    
-
-   
-   --outGain:hardSet("Gain",1.0)
-
-
-  
    connect(self,"In1",output,"Left")
    connect(trig,"Out",p_env,"Gate")
    connect(trig,"Out",a_env,"Gate")
@@ -133,18 +119,13 @@ function BD1:onLoadGraph(channelCount)
    -- output
    connect(osc, "Out", osc_env, "Right")
    connect(a_env, "Out", osc_env, "Left")
-   connect(osc_env, "Out", osc_amp, "Left")
+   connect(osc_env,"Out",osc_gain,"In")
+   connect(osc_gain,"Out",output,"Right")
 
-
-   --connect(outGain,"Out",osc_amp,"Right")
-   connect(gain,"Out",osc_amp,"Right")
-   connect(osc_amp, "Out", output, "Right")
-  
-  
    connect(output,"Out",self,"Out1")
    if channelCount==2 then
       local output2 = self:createObject("Sum","output")
-      connect(osc_amp, "Out", output2, "Right")
+      connect(osc_gain, "Out", output2, "Right")
       connect(self,"In2",output2,"Left")
       connect(output2,"Out",self,"Out2")
    end
@@ -153,22 +134,19 @@ function BD1:onLoadGraph(channelCount)
    self:createMonoBranch("p_decay",p_decay,"In",p_decay,"Out")
    self:createMonoBranch("a_decay",a_decay,"In",a_decay,"Out")
    self:createMonoBranch("pitch_env_depth",pitch_env_depth,"In",pitch_env_depth,"Out")
-   self:createMonoBranch("gain",gain,"In",gain,"Out")
    self:createMonoBranch("click", click,"In",click,"Out")
-   --self:createMonoBranch("outGain", outGain, "In", outGain,"Out")
    self:createMonoBranch("feedback",feedback,"In",feedback,"Out")
    
 end
 
 local views = {
-   --expanded = {"trig","tune","a_decay", "p_decay","pitch_env_depth","feedback","gain","outGain"},
    expanded = {"trig","click","tune","a_decay", "p_decay","pitch_env_depth","feedback","gain"},
    collapsed = {},
 }
 
 function BD1:onLoadViews(objects,branches)
    local controls = {}
-
+   
    local createMap = function (min, max, superCourse, course, fine, superFine, rounding)
       local map = app.LinearDialMap(min, max)
       map:setSteps(superCourse, course, fine, superFine)
@@ -178,7 +156,8 @@ function BD1:onLoadViews(objects,branches)
    
    local time_map = createMap(.001, 2, 0.1, 0.01, 0.001, 0.001, 0.001)
    local pitch_map = createMap(0, 1000, 100, 10, 1, 1, 1)
-   local gain_map = createMap(0, 1, .1, .01, .01, .01, .01)
+   local fb_map = createMap(0, 1, .1, .01, .01, .01, .01)
+   local gain_map = createMap(-60, 0, 10, 1, .1, .01, .01)
    local click_map = createMap(0, .25, .1, .01, .01, .01, .01)
    
    controls.scope = OutputScope {
@@ -199,14 +178,11 @@ function BD1:onLoadViews(objects,branches)
       description = "click",
       gainbias = objects.click,
       biasMap = click_map,
-      --biasMap = Encoder.getMap("[0,1]"),
       range = objects.click_range,
       initialBias = 0,
    }
    
 
-
-   
    controls.tune = Pitch {
       button = "V/oct",
       branch = branches.tune,
@@ -254,39 +230,17 @@ function BD1:onLoadViews(objects,branches)
       branch = branches.feedback,
       gainbias = objects.feedback,
       range = objects.feedbackRange,
-      biasMap = gain_map,
+      biasMap = fb_map,
       initialBias = 0,
    }
    
-   
-   
-   controls.gain = GainBias {
-      button = "gain",
-      branch = branches.gain,
-      description = "gain",
-      gainbias = objects.gain,
-      biasMap = gain_map,
-      range = objects.gain_range,
-      initialBias = 1,
-   }
-   
---[[
-      controls.outGain = Fader {
-      button = "gain",
-      description = "Post-Gain",
-      param = objects.outGain:getParameter("Gain"),
-      monitor = self,
-      map = Encoder.getMap("decibel36"),
-      units = app.unitDecibels
-      }
-
-   controls.gain = BranchMeter {
-      button = "gain",
-      branch = branches.gain,
-      faderParam = objects.gain:getParameter("Gain")
-   }
-   self:addToMuteGroup(controls.gain)
-   --]]
+  controls.gain = Fader {
+    button = "gain",
+    description = "Gain",
+    param = objects.osc_gain:getParameter("Gain"),
+    map = gain_map,
+    units = app.unitDecibels
+  }
    
    return controls, views
 end
