@@ -57,7 +57,6 @@ function BD1:onLoadGraph(channelCount)
    osc_gain:hardSet("Gain",1.0)
    
    local gain = self:createObject("GainBias","gain")
-   local gain_range = self:createObject("MinMax","gain_range")
    
    local feedback = self:createObject("GainBias","feedback")
    local feedbackRange = self:createObject("MinMax","feedbackRange")
@@ -99,7 +98,6 @@ function BD1:onLoadGraph(channelCount)
    connect(a_decay,"Out",a_decay_range,"In")
 
    connect(pitch_env_depth,"Out",pitch_env_depth_range,"In")
-   connect(gain,"Out",gain_range,"In")
    connect(feedback,"Out",osc,"Feedback")
    connect(feedback,"Out",feedbackRange,"In")
    
