@@ -1,9 +1,7 @@
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
-local GainBias = require "Unit.ViewControl.GainBias"
 local Gate = require "Unit.ViewControl.Gate"
-local Encoder = require "Encoder"
 local ply = app.SECTION_PLY
 
 local gate = Class{}
@@ -20,11 +18,8 @@ function gate:onLoadGraph(channelCount)
    local trig = self:createObject("Comparator","trig")
    trig:setGateMode()
    local slew = self:createObject("SlewLimiter","slew")
-   local slew_time = self:createObject("Constant","slew_time")
-   slew_time:hardSet("Value",.0001)
    slew:optionSet("Direction",app.SlewChoices.both)
-   connect(slew_time,"Out",slew,"Time")
-   
+   slew:hardSet("Time",.001)
    
    connect(self,"In1",vca1,"Left")
    connect(vca1,"Out",self,"Out1")

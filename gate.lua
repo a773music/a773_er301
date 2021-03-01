@@ -1,9 +1,7 @@
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
-local GainBias = require "Unit.ViewControl.GainBias"
 local Gate = require "Unit.ViewControl.Gate"
-local Encoder = require "Encoder"
 local ply = app.SECTION_PLY
 
 local gate = Class{}
