@@ -1,3 +1,4 @@
+local libcore = require "core.libcore"
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
@@ -15,13 +16,13 @@ function Decay:init(args)
 end
 
 function Decay:onLoadGraph(channelCount)
-   local gate = self:createObject("Comparator","gate")
+   local gate = self:addObject("gate", app.Comparator())
    gate:setGateMode()
    
-   local adsr = self:createObject("ADSR","adsr")
-   local decay = self:createObject("GainBias","decay")
-   local decayRange = self:createObject("MinMax","decayRange")
-   local exp = self:createObject("Multiply","exp")
+   local adsr = self:addObject("adsr", libcore.ADSR())
+   local decay = self:addObject("decay", app.GainBias())
+   local decayRange = self:addObject("decayRange", app.MinMax())
+   local exp = self:addObject("exp", app.Multiply())
    
    connect(self,"In1",gate,"In")
    connect(gate,"Out",adsr,"Gate")
@@ -41,7 +42,7 @@ function Decay:onLoadGraph(channelCount)
       connect(exp,"Out",self,"Out2")
    end
    
-   self:createMonoBranch("decay",decay,"In",decay,"Out")
+   self:addMonoBranch("decay",decay,"In",decay,"Out")
 end
 
 local views = {

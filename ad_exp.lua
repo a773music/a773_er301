@@ -1,3 +1,4 @@
+local libcore = require "core.libcore"
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
@@ -14,24 +15,24 @@ function AD_EXP:init(args)
 end
 
 function AD_EXP:onLoadGraph(channelCount)
-   local trig = self:createObject("Comparator","trig")
+   local trig = self:addObject("Comparator","trig")
    trig:setTriggerMode()
-   local pre_env = self:createObject("SkewedSineEnvelope","env")
-   local adsr = self:createObject("ADSR","adsr")
-   local attack = self:createObject("GainBias","attack")
-   local decay = self:createObject("GainBias","decay")
-   local attackRange = self:createObject("MinMax","attackRange")
-   local decayRange = self:createObject("MinMax","decayRange")
-   local pre_env_level = self:createObject("Constant","pre_env_level")
-   local pre_env_dur_bias = self:createObject("Constant","pre_env_dur_bias")
-   local pre_env_dur_sum = self:createObject("Sum","pre_env_dur_sum")
-   local duration = self:createObject("ParameterAdapter","duration")
+   local pre_env = self:addObject("env", libcore.SkewedSineEnvelope())
+   local adsr = self:addObject("adsr", libcore.ADSR())
+   local attack = self:addObject("attack", app.GainBias())
+   local decay = self:addObject("decay", app.GainBias())
+   local attackRange = self:addObject("attackRange", app.MinMax())
+   local decayRange = self:addObject("decayRange", app.MinMax())
+   local pre_env_level = self:addObject("pre_env_level", app.Constant())
+   local pre_env_dur_bias = self:addObject("pre_env_dur_bias", app.Constant())
+   local pre_env_dur_sum = self:addObject("pre_env_dur_sum", app.Sum())
+   local duration = self:addObject("duration", app.ParameterAdapter())
 
-   local decay_mod = self:createObject("Multiply","decay_mod")
-   local level_mult = self:createObject("Multiply","level_mult")
-   local level_sum = self:createObject("Sum","level_sum")
-   local level_mult_value = self:createObject("Constant","level_mult_value")
-   local level_sum_value = self:createObject("Constant","level_sum_value")
+   local decay_mod = self:addObject("decay_mod", app.Multiply())
+   local level_mult = self:addObject("level_mult", app.Multiply())
+   local level_sum = self:addObject("level_sum", app.Sum())
+   local level_mult_value = self:addObject("level_mult_value", app.Constant())
+   local level_sum_value = self:addObject("level_sum_value", app.Constant())
    --level_mult:hardSet("Left", 1)
    connect(level_mult_value, "Out", level_mult, "Left")
    connect(adsr, "Out", level_mult, "Right")
@@ -75,8 +76,8 @@ function AD_EXP:onLoadGraph(channelCount)
       connect(adsr,"Out",self,"Out2")
    end
 
-   self:createMonoBranch("attack",attack,"In",attack,"Out")
-   self:createMonoBranch("decay",decay,"In",decay,"Out")
+   self:addMonoBranch("attack",attack,"In",attack,"Out")
+   self:addMonoBranch("decay",decay,"In",decay,"Out")
 end
 
 local views = {

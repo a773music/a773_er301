@@ -1,3 +1,4 @@
+local libcore = require "core.libcore"
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
@@ -13,9 +14,9 @@ function stepped_random:init(args)
 end
 
 function stepped_random:onLoadGraph(channelCount)
-   local holdL = self:createObject("TrackAndHold","holdL")
-   local comparator = self:createObject("Comparator","comparator")
-   local noise = self:createObject("WhiteNoise","noise")
+   local holdL = self:addObject("holdL", libcore.TrackAndHold())
+   local comparator = self:addObject("comparator", app.Comparator())
+   local noise = self:addObject("noise", libcore.WhiteNoise())
 
    comparator:setTriggerMode()
 
@@ -25,7 +26,7 @@ function stepped_random:onLoadGraph(channelCount)
    connect(comparator,"Out",holdL,"Track")
    connect(holdL,"Out",self,"Out1")
 
-   self:createMonoBranch("trig",comparator,"In",comparator,"Out")
+   self:addMonoBranch("trig",comparator,"In",comparator,"Out")
 end
 
 local views = {

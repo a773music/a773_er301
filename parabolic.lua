@@ -1,21 +1,20 @@
+local libcore = require "core.libcore"
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
---local GainBias = require "Unit.ViewControl.GainBias"
---local OutputScope = require "Unit.ViewControl.OutputScope"
 local ply = app.SECTION_PLY
 
-local Decay = Class{}
-Decay:include(Unit)
+local parabolic = Class{}
+parabolic:include(Unit)
 
-function Decay:init(args)
-   args.title = "Parabolic"
+function parabolic:init(args)
+   args.title = "parabolic"
    args.mnemonic = "Pa"
    Unit.init(self,args)
 end
 
-function Decay:onLoadGraph(channelCount)
-   local exp = self:createObject("Multiply","exp")
+function parabolic:onLoadGraph(channelCount)
+   local exp = self:addObject("exp", app.Multiply())
    
    connect(self,"In1",exp,"Left")
    connect(self,"In1",exp,"Right")
@@ -32,10 +31,10 @@ local views = {
    collapsed = {},
 }
 
-function Decay:onLoadViews(objects,branches)
+function parabolic:onLoadViews(objects,branches)
    local controls = {}
 
    return controls, views
 end
 
-return Decay
+return parabolic

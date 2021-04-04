@@ -1,3 +1,4 @@
+local libcore = require "core.libcore"
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
@@ -14,55 +15,55 @@ local BD1 = Class{}
 BD1:include(Unit)
 
 function BD1:init(args)
-   args.title = "bd0"
+   args.title = "bd1"
    args.mnemonic = "Dx"
    Unit.init(self,args)
 end
 
 function BD1:onLoadGraph(channelCount)
-   local trig = self:createObject("Comparator","trig")
+   local trig = self:addObject("trig", app.Comparator())
    trig:setGateMode()
    --trig:setTriggerMode()
-   local sync = self:createObject("Comparator","sync")
+   local sync = self:addObject("sync", app.Comparator())
    sync:setTriggerMode()
    
-   local osc = self:createObject("SineOscillator","osc")
-   local base_freq = self:createObject("Constant","base_freq")
+   local osc = self:addObject("osc", libcore.SineOscillator())
+   local base_freq = self:addObject("base_freq", app.Constant())
    
-   local p_env = self:createObject("ADSR","p_env")
-   local pitch_env_depth = self:createObject("GainBias","pitch_env_depth")
-   local pitch_env_depth_range = self:createObject("MinMax","pitch_env_depth_range")
+   local p_env = self:addObject("p_env", libcore.ADSR())
+   local pitch_env_depth = self:addObject("pitch_env_depth", app.GainBias())
+   local pitch_env_depth_range = self:addObject("pitch_env_depth_range", app.MinMax())
    
-   local p_decay = self:createObject("GainBias","p_decay")
-   local p_decay_range = self:createObject("MinMax","p_decay_range")
-   local p_exp = self:createObject("Multiply","p_exp")
-   local p_exp2 = self:createObject("Multiply","p_exp2")
-   local a_exp = self:createObject("Multiply","a_exp")
-   local a_exp2 = self:createObject("Multiply","a_exp2")
-   local osc_env = self:createObject("Multiply","osc_env")
-   local osc_gain = self:createObject("ConstantGain","osc_gain")
+   local p_decay = self:addObject("p_decay", app.GainBias())
+   local p_decay_range = self:addObject("p_decay_range", app.MinMax())
+   local p_exp = self:addObject("p_exp", app.Multiply())
+   local p_exp2 = self:addObject("p_exp2", app.Multiply())
+   local a_exp = self:addObject("a_exp", app.Multiply())
+   local a_exp2 = self:addObject("a_exp2", app.Multiply())
+   local osc_env = self:addObject("osc_env", app.Multiply())
+   local osc_gain = self:addObject("osc_gain", app.ConstantGain())
    
-   local output = self:createObject("Sum","output")
-   local fundamental = self:createObject("Sum","fundamental")
-   local p_env_amplified = self:createObject("Multiply","p_env_amplified")
+   local output = self:addObject("output", app.Sum())
+   local fundamental = self:addObject("fundamental", app.Sum())
+   local p_env_amplified = self:addObject("p_env_amplified", app.Multiply())
    
-   local a_env = self:createObject("ADSR","a_env")
-   local a_decay = self:createObject("GainBias","a_decay")
-   local a_decay_range = self:createObject("MinMax","a_decay_range")
+   local a_env = self:addObject("a_env", libcore.ADSR())
+   local a_decay = self:addObject("a_decay", app.GainBias())
+   local a_decay_range = self:addObject("a_decay_range", app.MinMax())
    
-   local tune = self:createObject("ConstantOffset","tune")
-   local tuneRange = self:createObject("MinMax","tuneRange")
+   local tune = self:addObject("tune", app.ConstantOffset())
+   local tuneRange = self:addObject("tuneRange", app.MinMax())
    
    osc_gain:setClampInDecibels(-59.9)
    osc_gain:hardSet("Gain",1.0)
    
-   local gain = self:createObject("GainBias","gain")
+   local gain = self:addObject("gain", app.GainBias())
    
-   local feedback = self:createObject("GainBias","feedback")
-   local feedbackRange = self:createObject("MinMax","feedbackRange")
+   local feedback = self:addObject("feedback", app.GainBias())
+   local feedbackRange = self:addObject("feedbackRange", app.MinMax())
    
-   local click = self:createObject("GainBias","click")
-   local click_range = self:createObject("MinMax","click_range")
+   local click = self:addObject("click", app.GainBias())
+   local click_range = self:addObject("click_range", app.MinMax())
    
    connect(self,"In1",output,"Left")
    connect(trig,"Out",p_env,"Gate")
@@ -122,18 +123,18 @@ function BD1:onLoadGraph(channelCount)
 
    connect(output,"Out",self,"Out1")
    if channelCount==2 then
-      local output2 = self:createObject("Sum","output")
+      local output2 = self:addObject("output", app.Sum())
       connect(osc_gain, "Out", output2, "Right")
       connect(self,"In2",output2,"Left")
       connect(output2,"Out",self,"Out2")
    end
-   self:createMonoBranch("trig",trig,"In",trig,"Out")
-   self:createMonoBranch("tune",tune,"In",tune,"Out")
-   self:createMonoBranch("p_decay",p_decay,"In",p_decay,"Out")
-   self:createMonoBranch("a_decay",a_decay,"In",a_decay,"Out")
-   self:createMonoBranch("pitch_env_depth",pitch_env_depth,"In",pitch_env_depth,"Out")
-   self:createMonoBranch("click", click,"In",click,"Out")
-   self:createMonoBranch("feedback",feedback,"In",feedback,"Out")
+   self:addMonoBranch("trig",trig,"In",trig,"Out")
+   self:addMonoBranch("tune",tune,"In",tune,"Out")
+   self:addMonoBranch("p_decay",p_decay,"In",p_decay,"Out")
+   self:addMonoBranch("a_decay",a_decay,"In",a_decay,"Out")
+   self:addMonoBranch("pitch_env_depth",pitch_env_depth,"In",pitch_env_depth,"Out")
+   self:addMonoBranch("click", click,"In",click,"Out")
+   self:addMonoBranch("feedback",feedback,"In",feedback,"Out")
    
 end
 

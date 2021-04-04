@@ -1,3 +1,4 @@
+local libcore = require "core.libcore"
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
@@ -8,17 +9,18 @@ local gate = Class{}
 gate:include(Unit)
 
 function gate:init(args)
-   args.title = "Gate Soft"
+   args.title = "gate soft"
    args.mnemonic = "gts"
    Unit.init(self,args)
 end
 
 function gate:onLoadGraph(channelCount)
-   local vca1 = self:createObject("Multiply","vca1")
-   local trig = self:createObject("Comparator","trig")
+   local vca1 = self:addObject("vca1", app.Multiply())
+   local trig = self:addObject("trig", app.Comparator())
    trig:setGateMode()
-   local slew = self:createObject("SlewLimiter","slew")
-   slew:optionSet("Direction",app.SlewChoices.both)
+   local slew = self:addObject("slew", libcore.SlewLimiter())
+   slew:setOptionValue("Direction", 2)
+
    slew:hardSet("Time",.001)
    
    connect(self,"In1",vca1,"Left")
@@ -27,13 +29,13 @@ function gate:onLoadGraph(channelCount)
    connect(slew,"Out",vca1,"Right")
 
    if channelCount==2 then
-      local vca2 = self:createObject("Multiply","vca2")
+      local vca2 = self:addObject("vca2", app.Multiply())
       connect(self,"In2",vca2,"Left")
       connect(vca2,"Out",self,"Out2")
       connect(slew,"Out",vca2,"Right")
    end
    
-   self:createMonoBranch("trig",trig,"In",trig,"Out")
+   self:addMonoBranch("trig",trig,"In",trig,"Out")
 end
 
 function gate:onLoadViews(objects,branches)

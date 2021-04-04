@@ -1,3 +1,4 @@
+local libcore = require "core.libcore"
 local app = app
 local Class = require "Base.Class"
 local Unit = require "Unit"
@@ -10,7 +11,7 @@ local Gainer = Class{}
 Gainer:include(Unit)
 
 function Gainer:init(args)
-   args.title = "Gain"
+   args.title = "gain"
    args.mnemonic = "GA"
    Unit.init(self,args)
 end
@@ -24,7 +25,7 @@ function Gainer:onLoadGraph(channelCount)
 end
 
 function Gainer:loadMonoGraph()
-   local gain = self:createObject("ConstantGain","gain")
+   local gain = self:addObject("gain", app.ConstantGain())
 
    gain:setClampInDecibels(-59.9)
    gain:hardSet("Gain",1.0)
@@ -34,8 +35,8 @@ function Gainer:loadMonoGraph()
 end
 
 function Gainer:loadStereoGraph()
-   local gain1 = self:createObject("ConstantGain","gain1")
-   local gain2 = self:createObject("ConstantGain","gain2")
+   local gain1 = self:addObject("gain1", app.ConstantGain())
+   local gain2 = self:addObject("gain2", app.ConstantGain())
 
    gain1:setClampInDecibels(-59.9)
    gain1:hardSet("Gain",1.0)
@@ -69,7 +70,7 @@ function Gainer:onLoadViews(objects,branches)
       return map
    end
    
-   local gain_map = createMap(-60, 10, 10, 1, .1, .01, .01)
+   local gain_map = createMap(-60, 40, 10, 1, .1, .01, .01)
    
    controls.gain = Fader {
       button = "gain",
