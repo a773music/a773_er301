@@ -12,8 +12,8 @@ Parabolic: 0.03%
 Stepped Random: 0.69% (CU: 1.12%, AccentsPingedScaledRandom: 1.78%)  
 
 ## Installation
-1) download [a773-0.0.1.pkg](https://github.com/attejensen/a773_er301_bespoke/raw/main/a773-0.0.1.pkg)  
-2) copy to SD card + install from 0.6 package manager  
+1) Download [a773-0.0.1.pkg](https://github.com/attejensen/a773_er301_bespoke/raw/main/a773-0.0.1.pkg)  
+2) Copy to SD card + install from 0.6 package manager  
 
 ## Regarding CPU-usage
 CPU-usage is not linear on the ER-301. These figures are measured in the most conservative way:  
