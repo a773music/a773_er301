@@ -156,7 +156,7 @@ function BD1:onLoadViews(objects,branches)
    local time_map = createMap(.001, 2, 0.1, 0.01, 0.001, 0.001, 0.001)
    local pitch_map = createMap(0, 1000, 100, 10, 1, 1, 1)
    local fb_map = createMap(0, 1, .1, .01, .01, .01, .01)
-   local gain_map = createMap(-60, 0, 10, 1, .1, .01, .01)
+   local gain_map = createMap(-60, 1, 10, 1, .1, .01, .01)
    local click_map = createMap(0, .25, .1, .01, .01, .01, .01)
    
    controls.scope = OutputScope {
